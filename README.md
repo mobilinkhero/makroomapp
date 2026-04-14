@@ -1,58 +1,258 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Makroom Laravel Admin Panel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Professional admin panel for managing the Makroom mobile app with country-based configuration switching.
 
-## About Laravel
+## 🚀 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Admin Panel
+- **Dashboard** - Statistics and quick actions
+- **Country Management** - Bulk whitelist management with visual cards
+- **UI Settings** - Control app behavior (contact admin button, messages, features)
+- **Configurations** - Manage Config A (SIM Owner) and Config B (Room Search)
+- **Records** - CRUD operations for app content
+- **App Texts** - Manage text strings
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### API Endpoints
+- `GET /api/config` - Get app configuration based on country
+- `POST /api/search` - Search records
+- `GET /api/health` - Health check
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Key Features
+- Country-based config switching (Config A for whitelisted, Config B for others)
+- Server-driven UI architecture
+- Bulk country management
+- UI settings control (contact admin button, messages, etc.)
+- SQLite database
+- Modern Tailwind CSS design
+- RESTful API for Flutter app
 
-## Learning Laravel
+## 📋 Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.2+
+- Composer
+- SQLite
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Installation
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### 1. Clone the repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/mobilinkhero/makroomapp.git
+cd makroomapp
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
+```bash
+composer install
+```
 
-## Contributing
+### 3. Set up environment
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Create database
+```bash
+touch database/database.sqlite
+```
 
-## Code of Conduct
+### 5. Run migrations
+```bash
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 6. Seed database
+```bash
+php artisan db:seed --class=CountrySeeder
+php artisan db:seed --class=AppConfigSeeder
+php artisan db:seed --class=AppTextSeeder
+php artisan db:seed --class=RecordSeeder
+php artisan db:seed --class=UISettingSeeder
+```
 
-## Security Vulnerabilities
+### 7. Start server
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🌐 Access
 
-## License
+### Admin Panel
+```
+http://localhost:8000/admin
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### API Endpoints
+```
+GET  http://localhost:8000/api/config
+POST http://localhost:8000/api/search
+GET  http://localhost:8000/api/health
+```
+
+## 📊 Database Structure
+
+### Tables
+- `countries` - Country list with whitelist status
+- `app_configs` - Config A and Config B settings
+- `records` - App content (SIM details or rooms)
+- `app_texts` - Text strings for the app
+- `ui_settings` - UI behavior settings
+
+### Sample Data
+- 40 countries (5 whitelisted, 35 not)
+- 2 app configurations
+- 9 sample records
+- 8 app text strings
+- 8 UI settings
+
+## 🎯 How It Works
+
+### Country-Based Config Switching
+
+1. Mobile app requests config: `GET /api/config`
+2. Server checks country code (from header `X-Country-Code`)
+3. If country is whitelisted → Returns Config A (SIM Owner Details)
+4. If country is NOT whitelisted → Returns Config B (Room Search)
+5. App renders UI based on config
+
+### Admin Panel Workflow
+
+1. **Manage Countries**: Select multiple countries and add to Config A or move to Config B
+2. **UI Settings**: Toggle contact admin button, set messages, enable/disable features
+3. **Records**: Create, edit, delete content for both configs
+4. **Configurations**: Edit app title, search placeholder, components, feature flags
+
+## 🔧 Configuration
+
+### Whitelisted Countries (Config A)
+- United States (US)
+- United Kingdom (GB)
+- Canada (CA)
+- Australia (AU)
+- Germany (DE)
+
+### Config A - SIM Owner Details App
+- For whitelisted countries
+- Search placeholder: "Enter phone number or SIM details..."
+- Features: Advanced search, Export, Notifications
+
+### Config B - Room Finder App
+- For non-whitelisted countries
+- Search placeholder: "Search for rooms..."
+- Features: Advanced search, Favorites
+
+## 📱 Mobile App Integration
+
+The API returns configuration with UI settings:
+
+```json
+{
+  "version": "1.0.0",
+  "components": [...],
+  "featureFlags": {...},
+  "uiSettings": {
+    "show_contact_admin_button": true,
+    "contact_admin_email": "admin@simowner.com",
+    "no_results_message": "No SIM owner details found. Please contact admin for assistance.",
+    "enable_advanced_search": true
+  }
+}
+```
+
+## 🎨 Admin Panel Features
+
+### Dashboard
+- Total countries count
+- Whitelisted countries count
+- Total records count
+- Active records count
+- Config A vs Config B breakdown
+
+### Country Management
+- Visual card-based layout
+- Bulk selection with checkboxes
+- "Select All" / "Deselect All" buttons
+- Bulk actions for Config A/B
+- Color-coded cards (Blue = Config A, Purple = Config B)
+
+### UI Settings
+- Toggle "Contact Admin" button ON/OFF
+- Set contact admin email
+- Customize "No Results" message
+- Enable/disable features
+- Separate settings for Config A and Config B
+
+## 🚀 API Usage
+
+### Get Configuration
+```bash
+curl -H "X-Country-Code: US" http://localhost:8000/api/config
+```
+
+### Search Records
+```bash
+curl -X POST http://localhost:8000/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"office","config_type":"config_b"}'
+```
+
+### Health Check
+```bash
+curl http://localhost:8000/api/health
+```
+
+## 📝 Development
+
+### Add New Country
+```php
+Country::create([
+    'name' => 'France',
+    'code' => 'FR',
+    'is_whitelisted' => false
+]);
+```
+
+### Add New Record
+```php
+Record::create([
+    'config_type' => 'config_b',
+    'title' => 'Meeting Room',
+    'description' => 'Professional meeting space',
+    'is_active' => true,
+    'data' => json_encode([
+        'capacity' => ['type' => 'number', 'value' => 10],
+        'rating' => ['type' => 'number', 'value' => 4.5]
+    ])
+]);
+```
+
+### Add New UI Setting
+```php
+UISetting::create([
+    'key' => 'config_a_show_help_button',
+    'config_type' => 'config_a',
+    'setting_type' => 'boolean',
+    'value' => 'true',
+    'label' => 'Show Help Button',
+    'description' => 'Display help button in the app'
+]);
+```
+
+## 🔒 Security
+
+- CORS enabled for API endpoints
+- Input validation on all forms
+- SQL injection protection (Eloquent ORM)
+- XSS protection (Blade templating)
+
+## 📄 License
+
+This project is proprietary software.
+
+## 👥 Support
+
+For support, email: admin@makroom.com
+
+## 🎉 Credits
+
+Built with Laravel 11, Tailwind CSS, and modern web technologies.
