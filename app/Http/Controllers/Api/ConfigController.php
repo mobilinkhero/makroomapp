@@ -112,10 +112,10 @@ class ConfigController extends Controller
         
         $ip = $request->ip();
         
-        // For local/private IPs, default to US for testing
+        // For local/private IPs, default to Pakistan (since you're testing from Pakistan)
         if ($ip === '127.0.0.1' || $ip === '::1' || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
-            Log::info('Local IP detected, defaulting to US', ['ip' => $ip]);
-            return 'US';
+            Log::info('Local IP detected, defaulting to Pakistan', ['ip' => $ip]);
+            return 'PK';  // Changed from 'US' to 'PK'
         }
         
         try {
@@ -133,8 +133,8 @@ class ConfigController extends Controller
             Log::error('Failed to detect country from IP', ['ip' => $ip, 'error' => $e->getMessage()]);
         }
         
-        // Default to US if detection fails
-        Log::info('Country detection failed, defaulting to US', ['ip' => $ip]);
-        return 'US';
+        // Default to Pakistan if detection fails
+        Log::info('Country detection failed, defaulting to Pakistan', ['ip' => $ip]);
+        return 'PK';  // Changed from 'US' to 'PK'
     }
 }
