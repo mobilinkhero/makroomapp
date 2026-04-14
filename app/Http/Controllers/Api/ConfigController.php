@@ -7,13 +7,17 @@ use App\Models\Country;
 use App\Models\AppConfig;
 use App\Models\UISetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ConfigController extends Controller
 {
     public function index(Request $request)
     {
-        // Get country code from header or default to US
-        $countryCode = $request->header('X-Country-Code', 'US');
+        // Get country code from IP address
+        $countryCode = $this->getCountryFromIP($request);
+        
+        Log::info('Country detected', ['country_code' => $countryCode, 'ip' => $request->ip()]);
         
         // Check if country is whitelisted
         $country = Country::where('code', $countryCode)->first();
@@ -21,6 +25,8 @@ class ConfigController extends Controller
         $configType = ($country && $country->is_whitelisted) 
                       ? 'config_a' 
                       : 'config_b';
+        
+        Log::info('Config type determined', ['config_type' => $configType, 'is_whitelisted' => $country ? $country->is_whitelisted : false]);
         
         $config = AppConfig::where('config_type', $configType)
                            ->where('is_active', true)
@@ -70,7 +76,9 @@ class ConfigController extends Controller
                     'enableAdvancedSearch' => true,
                     'enableImageDisplay' => true
                 ],
-                'uiSettings' => $uiSettingsArray
+                'uiSettings' => $uiSettingsArray,
+                'detectedCountry' => $countryCode,
+                'configType' => $configType
             ]);
         }
         
@@ -89,7 +97,44 @@ class ConfigController extends Controller
                 ]
             ],
             'featureFlags' => json_decode($config->feature_flags ?? '{}'),
-            'uiSettings' => $uiSettingsArray
+            'uiSettings' => $uiSettingsArray,
+            'detectedCountry' => $countryCode,
+            'configType' => $configType
         ]);
+    }
+    
+    private function getCountryFromIP(Request $request)
+    {
+        // First check if country code is provided in header (for testing)
+        if ($request->hasHeader('X-Country-Code')) {
+            return strtoupper($request->header('X-Country-Code'));
+        }
+        
+        $ip = $request->ip();
+        
+        // For local/private IPs, default to US for testing
+        if ($ip === '127.0.0.1' || $ip === '::1' || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
+            Log::info('Local IP detected, defaulting to US', ['ip' => $ip]);
+            return 'US';
+        }
+        
+        try {
+            // Use ip-api.com (free, no API key required, 45 requests/minute)
+            $response = Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['countryCode'])) {
+                    Log::info('Country detected from IP', ['ip' => $ip, 'country' => $data['countryCode']]);
+                    return strtoupper($data['countryCode']);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to detect country from IP', ['ip' => $ip, 'error' => $e->getMessage()]);
+        }
+        
+        // Default to US if detection fails
+        Log::info('Country detection failed, defaulting to US', ['ip' => $ip]);
+        return 'US';
     }
 }
