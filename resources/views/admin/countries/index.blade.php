@@ -83,6 +83,8 @@
         </div>
     </div>
 </div>
+
+<script>
 function selectAll() {
     document.querySelectorAll('.country-checkbox').forEach(cb => cb.checked = true);
     updateSelectedCount();
